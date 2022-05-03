@@ -5,13 +5,41 @@ on: push
 jobs:
   super-lint:
     name: Lint code base
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #  runs-on: ubuntu-latest
+   # steps:
+    #  - name: Checkout code
+    #    uses: actions/checkout@v2
 
-      - name: Run Super-Linter
-        uses: github/super-linter@v3
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #  - name: Run Super-Linter
+    #    uses: github/super-linter@v3
+    #    env:
+  #        DEFAULT_BRANCH: main
+ #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+image: python:3
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install -r requirements.txt
+
+stages:
+  - testing
+
+pytest:
+  stage: testing
+  script:
+    - pytest --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
